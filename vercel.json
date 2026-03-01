@@ -1,18 +1,11 @@
 {
-  "installCommand": "pnpm install --frozen-lockfile",
+  "framework": "vite",
+  "installCommand": "pnpm install",
   "buildCommand": "pnpm run build:client",
   "outputDirectory": "dist/spa",
   "routes": [
-    {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
+    { "handle": "filesystem" },
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
