@@ -1,10 +1,12 @@
 import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
 import fs from "fs/promises";
 import path from "path";
+import { fileURLToPath } from "url";
 import { v4 as uuidv4 } from "uuid";
 import { env } from "../config/env";
 
-const storageDir = path.resolve(import.meta.dirname, "../storage/encrypted");
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const storageDir = path.resolve(__dirname, "../storage/encrypted");
 const key = Buffer.from(env.encryptionKeyHex, "hex");
 
 if (key.length !== 32) {

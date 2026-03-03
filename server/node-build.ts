@@ -1,7 +1,10 @@
 import path from "path";
+import { fileURLToPath } from "url";
 import { createServer } from "./index";
 import { connectDatabase } from "./config/db";
 import * as express from "express";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = createServer();
 const port = process.env.PORT || 3000;
@@ -17,7 +20,6 @@ connectDatabase()
   });
 
 // In production, serve the built SPA files
-const __dirname = import.meta.dirname;
 const distPath = path.join(__dirname, "../spa");
 
 // Serve static files
