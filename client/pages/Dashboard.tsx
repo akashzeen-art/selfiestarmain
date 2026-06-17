@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import AppLayout from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Camera, Star, TrendingUp, Award, Trash2, Heart } from "lucide-react";
@@ -22,7 +22,6 @@ export default function Dashboard() {
     { label: t.dashboard.totalSelfies, value: selfies.length.toString(), icon: Star },
     { label: t.dashboard.avgScore, value: getAverageScore() > 0 ? `${getAverageScore()}%` : "--", icon: TrendingUp },
     { label: t.dashboard.bestScore, value: getBestScore() > 0 ? `${getBestScore()}` : "--", icon: Award },
-    { label: t.dashboard.challengeWins, value: "0", icon: Camera },
   ];
 
   return (
@@ -55,7 +54,7 @@ export default function Dashboard() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {stats.map((stat, index) => {
             const Icon = stat.icon;
             return (
@@ -143,26 +142,14 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Additional Content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="p-6 rounded-xl border border-white/20 bg-transparent backdrop-blur-sm">
-            <h3 className="text-lg font-bold mb-2">{t.dashboard.quickTips}</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>{t.dashboard.tip1}</li>
-              <li>{t.dashboard.tip2}</li>
-              <li>{t.dashboard.tip3}</li>
-            </ul>
-          </div>
-
-          <div className="p-6 rounded-xl border border-white/20 bg-transparent backdrop-blur-sm">
-            <h3 className="text-lg font-bold mb-2">{t.dashboard.nextChallenge}</h3>
-            <p className="text-sm text-muted-foreground mb-4">{t.dashboard.nextChallengeDesc}</p>
-            <Link to="/challenges">
-              <Button variant="outline" className="w-full text-sm border-white/20 text-white hover:bg-white/10">
-                {t.dashboard.viewChallenges}
-              </Button>
-            </Link>
-          </div>
+        {/* Quick Tips */}
+        <div className="p-6 rounded-xl border border-white/20 bg-transparent backdrop-blur-sm">
+          <h3 className="text-lg font-bold mb-2">{t.dashboard.quickTips}</h3>
+          <ul className="space-y-2 text-sm text-muted-foreground">
+            <li>{t.dashboard.tip1}</li>
+            <li>{t.dashboard.tip2}</li>
+            <li>{t.dashboard.tip3}</li>
+          </ul>
         </div>
       </div>
     </AppLayout>

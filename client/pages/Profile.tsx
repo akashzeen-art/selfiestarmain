@@ -401,7 +401,7 @@ export default function Profile() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="rounded-lg border border-border/40 bg-transparent backdrop-blur-sm p-4 text-center">
             <Star className="h-6 w-6 text-neon-purple mx-auto mb-2" />
             <div className="text-2xl font-bold">{stats.totalSelfies}</div>
@@ -411,11 +411,6 @@ export default function Profile() {
             <TrendingUp className="h-6 w-6 text-green-500 mx-auto mb-2" />
             <div className="text-2xl font-bold">{stats.averageScore.toFixed(1)}</div>
             <div className="text-xs text-muted-foreground">{t.profile.avgScore}</div>
-          </div>
-          <div className="rounded-lg border border-border/40 bg-transparent backdrop-blur-sm p-4 text-center">
-            <Award className="h-6 w-6 text-neon-pink mx-auto mb-2" />
-            <div className="text-2xl font-bold">{stats.challengeWins}</div>
-            <div className="text-xs text-muted-foreground">{t.profile.wins}</div>
           </div>
         </div>
 
@@ -433,8 +428,6 @@ export default function Profile() {
           <div className="rounded-xl border border-border/40 bg-transparent backdrop-blur-sm p-6">
             <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><Camera className="h-5 w-5 text-neon-pink" />{t.profile.activity}</h2>
             <div className="space-y-3">
-              <div className="flex justify-between items-center"><span className="text-muted-foreground">{t.profile.challengesParticipated}</span><span className="font-bold">{stats.challengesParticipated}</span></div>
-              <div className="flex justify-between items-center"><span className="text-muted-foreground">{t.profile.challengeWins}</span><span className="font-bold">{stats.challengeWins}</span></div>
               <div className="flex justify-between items-center"><span className="text-muted-foreground">{t.profile.totalVideos}</span><span className="font-bold">{stats.totalVideos}</span></div>
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">{t.profile.lastLogin}</span>

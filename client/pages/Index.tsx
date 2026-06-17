@@ -1,6 +1,6 @@
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Star, Camera, Zap, Users, Trophy, Loader } from "lucide-react";
+import { Star, Camera, Zap, Users, Loader } from "lucide-react";
 import VideoBackground from "@/components/VideoBackground";
 import LanguageDropdown from "@/components/LanguageDropdown";
 import Footer from "@/components/Footer";
@@ -119,7 +119,7 @@ export default function Index() {
             </div>
             <div className="p-6 rounded-xl border border-white/20 bg-transparent backdrop-blur-sm hover:border-white/50 transition-colors group">
               <div className="h-12 w-12 rounded-lg bg-white/20 border border-white/30 flex items-center justify-center mb-4 group-hover:shadow-lg group-hover:shadow-white/20 transition-shadow">
-                <Trophy className="h-6 w-6 text-white" />
+                <Camera className="h-6 w-6 text-white" />
               </div>
               <h3 className="text-xl font-bold mb-2">{t.index.feature2Title}</h3>
               <p className="text-muted-foreground">{t.index.feature2Desc}</p>

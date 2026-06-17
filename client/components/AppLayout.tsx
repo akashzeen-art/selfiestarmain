@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Camera, Zap, LogOut, User } from "lucide-react";
+import { Camera, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import VideoBackground from "@/components/VideoBackground";
@@ -35,11 +35,6 @@ export default function AppLayout({ children, title, description }: AppLayoutPro
                 <Camera className="h-4 w-4" />{t.nav.dashboard}
               </Button>
             </Link>
-            <Link to="/challenges">
-              <Button variant="ghost" className="text-sm gap-2 text-white hover:text-white hover:bg-white/10">
-                <Zap className="h-4 w-4" />{t.nav.challenges}
-              </Button>
-            </Link>
             <Link to="/profile">
               <Button variant="ghost" className="text-sm gap-2 text-white hover:text-white hover:bg-white/10">
                 <User className="h-4 w-4" />{t.nav.profile}
@@ -67,10 +62,6 @@ export default function AppLayout({ children, title, description }: AppLayoutPro
           <Link to="/dashboard" className="flex flex-col items-center gap-1 text-white hover:text-white/80 transition-colors">
             <Camera className="h-5 w-5" />
             <span className="text-xs">{t.nav.dashboard}</span>
-          </Link>
-          <Link to="/challenges" className="flex flex-col items-center gap-1 text-white hover:text-white/80 transition-colors">
-            <Zap className="h-5 w-5" />
-            <span className="text-xs">{t.nav.challenges}</span>
           </Link>
           <Link to="/profile" className="flex flex-col items-center gap-1 text-white hover:text-white/80 transition-colors">
             <User className="h-5 w-5" />
