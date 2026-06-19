@@ -11,6 +11,7 @@ const ar = {
   index: {
     hero: "ابتسم، التقط سيلفي !",
     getStarted: "ابدأ الآن",
+    demoBtn: "جرب العرض التوضيحي",
     alreadyStar: "أنت بالفعل نجم؟",
     whyTitle: "لماذا SelfiStar؟",
     feature1Title: "تقييم بالذكاء الاصطناعي",
@@ -42,6 +43,14 @@ const ar = {
     backHome: "→ العودة إلى الرئيسية",
     fillFields: "يرجى ملء جميع الحقول",
     loginFailed: "فشل تسجيل الدخول. يرجى المحاولة مرة أخرى.",
+    demoBtn: "دخول العرض التوضيحي",
+    demoNote: "اضغط أدناه لاستكشاف SelfiStar فوراً — بدون تسجيل.",
+    enteringDemo: "جارٍ بدء العرض التوضيحي...",
+    msisdnTitle: "أدخل رقم الجوال",
+    msisdnDesc: "رقم العرض التوضيحي معبأ مسبقاً. اضغط تسجيل الدخول للمتابعة.",
+    msisdnLabel: "رقم الجوال (MSISDN)",
+    msisdnRequired: "يرجى إدخال رقم الجوال",
+    cancel: "إلغاء",
   },
   register: {
     joinStars: "انضم إلى ملايين النجوم",

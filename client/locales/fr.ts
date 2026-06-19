@@ -11,6 +11,7 @@ const fr = {
   index: {
     hero: "SOURIS, PRENDS UN SELFIE !",
     getStarted: "Commencer",
+    demoBtn: "Essayer la démo",
     alreadyStar: "Déjà une Star ?",
     whyTitle: "Pourquoi SelfiStar ?",
     feature1Title: "Score par IA",
@@ -42,6 +43,14 @@ const fr = {
     backHome: "← Retour à l'accueil",
     fillFields: "Veuillez remplir tous les champs",
     loginFailed: "Échec de la connexion. Veuillez réessayer.",
+    demoBtn: "Entrer en démo",
+    demoNote: "Appuyez ci-dessous pour explorer SelfiStar instantanément — sans inscription.",
+    enteringDemo: "Démarrage de la démo...",
+    msisdnTitle: "Entrez votre numéro mobile",
+    msisdnDesc: "Le numéro démo est déjà rempli. Appuyez sur Connexion pour continuer.",
+    msisdnLabel: "Numéro mobile (MSISDN)",
+    msisdnRequired: "Veuillez entrer votre numéro mobile",
+    cancel: "Annuler",
   },
   register: {
     joinStars: "Rejoignez des millions de Stars",

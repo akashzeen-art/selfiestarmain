@@ -10,7 +10,6 @@ export interface User {
   email: string;
   username: string;
   phone?: string;
-  portal?: boolean;
   profileImage?: string;
   role: "user";
   createdAt: string;
@@ -135,26 +134,6 @@ export interface DemoResponse {
 export interface AuthResponse {
   token: string;
   user: User;
-}
-
-export interface SubscriptionAccount {
-  msisdn: string;
-  valid_from?: string;
-  valid_to?: string;
-  status: 0 | 1;
-  service_name?: string;
-  pricePoint?: string;
-  redirectUrl?: string;
-}
-
-export interface SubscriptionStatusResponse {
-  status: 0 | 1;
-  redirectUrl?: string;
-}
-
-export interface UnsubscribeResponse {
-  status: 0 | 1;
-  redirectUrl?: string;
 }
 
 export interface ChallengeDto {

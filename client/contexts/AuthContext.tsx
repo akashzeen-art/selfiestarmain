@@ -2,25 +2,13 @@ import React, { createContext, useContext, useState } from "react";
 import { apiClient, tokenStorage } from "@/lib/axios";
 import { AuthResponse, User } from "@shared/api";
 
-export class AuthError extends Error {
-  redirectUrl?: string;
-  subscriptionRequired?: boolean;
-
-  constructor(message: string, options?: { redirectUrl?: string; subscriptionRequired?: boolean }) {
-    super(message);
-    this.name = "AuthError";
-    this.redirectUrl = options?.redirectUrl;
-    this.subscriptionRequired = options?.subscriptionRequired;
-  }
-}
-
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (identifier: string, password: string, isPhone?: boolean) => Promise<void>;
-  adminLogin: (email: string, password: string) => Promise<void>;
-  register: (phone: string, username: string, password: string) => Promise<void>;
+  demoLogin: () => Promise<void>;
+  register: (email: string, username: string, password: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -54,25 +42,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       tokenStorage.set(response.data.token);
       setUser(response.data.user);
     } catch (error: any) {
-      const data = error.response?.data;
-      if (data?.redirectUrl && (data?.status === 0 || error.response?.status === 403)) {
-        throw new AuthError(data.message || "Subscription required", {
-          redirectUrl: data.redirectUrl,
-          subscriptionRequired: true,
-        });
-      }
-      const errorMessage = data?.message || error.message || "Login failed";
+      const errorMessage = error.response?.data?.message || error.message || "Login failed";
       throw new Error(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const register = async (phone: string, username: string, password: string) => {
+  const demoLogin = async () => {
+    setIsLoading(true);
+    try {
+      const response = await apiClient.post<AuthResponse>("/auth/demo-login");
+      tokenStorage.set(response.data.token);
+      setUser(response.data.user);
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || "Demo login failed";
+      throw new Error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const register = async (email: string, username: string, password: string) => {
     setIsLoading(true);
     try {
       const response = await apiClient.post<AuthResponse>("/auth/register", {
-        phone,
+        email,
         username,
         password,
       });
@@ -98,6 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isAuthenticated: !!user,
         isLoading,
         login,
+        demoLogin,
         register,
         logout,
       }}

@@ -8,14 +8,12 @@ import VideoBackground from "@/components/VideoBackground";
 import Footer from "@/components/Footer";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-const IRAQ_COUNTRY_CODE = "+964";
-
 export default function Register() {
   const navigate = useNavigate();
   const { register, isLoading } = useAuth();
   const { t } = useLanguage();
 
-  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -26,7 +24,7 @@ export default function Register() {
     e.preventDefault();
     setError("");
 
-    if (!phone || !username || !password || !confirmPassword) {
+    if (!email || !username || !password || !confirmPassword) {
       setError(t.register.fillFields);
       return;
     }
@@ -44,8 +42,7 @@ export default function Register() {
     }
 
     try {
-      const fullPhone = `${IRAQ_COUNTRY_CODE}${phone.trim()}`;
-      await register(fullPhone, username, password);
+      await register(email.trim(), username, password);
       navigate("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : t.register.registerFailed);
@@ -73,23 +70,17 @@ export default function Register() {
                 </div>
               )}
 
-              {/* Mobile Number */}
+              {/* Email */}
               <div>
-                <label className="text-sm font-medium mb-2 block">Mobile Number</label>
-                <div className="flex gap-2">
-                  <div className="h-10 flex items-center justify-center rounded-md border border-border/40 bg-input px-3 text-sm text-white shrink-0">
-                    🇮🇶 +964
-                  </div>
-                  <Input
-                    type="tel"
-                    placeholder="7901234567"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
-                    disabled={isLoading}
-                    className="bg-input border-border/40 focus:border-white/60 flex-1"
-                    maxLength={15}
-                  />
-                </div>
+                <label className="text-sm font-medium mb-2 block">{t.register.email}</label>
+                <Input
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isLoading}
+                  className="bg-input border-border/40 focus:border-white/60"
+                />
               </div>
 
               {/* Username */}

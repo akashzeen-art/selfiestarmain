@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import { loginUser, registerUser, sanitizeUser } from "../services/auth-service";
+import { demoLogin, loginUser, registerUser, sanitizeUser } from "../services/auth-service";
 import { asyncHandler } from "../utils/http";
 
 /**
@@ -61,6 +61,19 @@ export const loginController: RequestHandler = asyncHandler(async (req, res) => 
  * GET /api/auth/me
  * Requires: Authentication (Bearer token)
  */
+/**
+ * Demo login — auto sign-in without credentials
+ * POST /api/auth/demo-login
+ */
+export const demoLoginController: RequestHandler = asyncHandler(async (_req, res) => {
+  const result = await demoLogin();
+
+  res.status(200).json({
+    message: "Demo login successful",
+    ...result,
+  });
+});
+
 export const meController: RequestHandler = asyncHandler(async (req, res) => {
   // User is attached to req by requireAuth middleware
   // requireAuth already ensures user exists, so this check is defensive

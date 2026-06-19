@@ -3,93 +3,63 @@ import jwt from "jsonwebtoken";
 import { env } from "../config/env";
 import { User, IUser } from "../models/User";
 import { HttpError } from "../utils/http";
-import { checkSubscriptionStatus, toMsisdn } from "../services/mselfistar-service";
+import {
+  isDemoMsisdn,
+  normalizeMsisdn,
+} from "../../shared/demo.ts";
 
 /**
  * Authentication Service
  * Handles user registration, login, JWT token generation, and password hashing
- * Optimized for low-cost hosting with efficient queries
  */
+
+const DEMO_EMAIL = "demo@selfistar.app";
+const DEMO_PASSWORD = "Demo123456";
+const DEMO_USERNAME = "demouser";
+const DEMO_PHONE_PASSWORD = "DemoPass123!";
 
 type AuthTokenPayload = {
   sub: string;
   role: IUser["role"];
   email: string;
   phone?: string;
-  portal?: boolean;
 };
 
-function sanitizePortalUser(msisdn: string) {
-  return {
-    id: msisdn,
-    username: msisdn,
-    name: msisdn,
-    email: "",
-    phone: msisdn,
-    portal: true,
-    role: "user" as const,
-    profileImage: undefined,
-    totalSelfies: 0,
-    totalVideos: 0,
-    totalScore: 0,
-    challengeWins: 0,
-    averageScore: 0,
-    badges: [] as string[],
-    isVerified: true,
-    lastLogin: undefined,
-    createdAt: new Date().toISOString(),
-    isBlocked: false,
-  };
+function normalizePhone(phone: string): string {
+  return normalizeMsisdn(phone);
 }
 
-function issuePortalToken(msisdn: string) {
-  const payload: AuthTokenPayload = {
-    sub: `portal:${msisdn}`,
-    role: "user",
-    email: "",
-    phone: msisdn,
-    portal: true,
-  };
-  const token = jwt.sign(payload, env.jwtSecret, { expiresIn: "7d" });
-  return { token, user: sanitizePortalUser(msisdn) };
-}
+async function ensureDemoPhoneUser(phone: string): Promise<IUser | null> {
+  if (!isDemoMsisdn(phone)) return null;
 
-function buildPortalAuthUser(msisdn: string): IUser {
-  const now = new Date();
-  return {
-    _id: msisdn as unknown as IUser["_id"],
-    username: msisdn,
-    name: msisdn,
-    email: "",
+  const msisdn = normalizePhone(phone);
+  let user = await User.findOne({
+    phone: { $in: [msisdn, `+${msisdn}`] },
+  });
+
+  if (user) return user;
+
+  const existingUsername = await User.findOne({ username: DEMO_USERNAME }).select("_id").lean();
+  user = new User({
+    name: "Demo User",
+    username: existingUsername ? `${DEMO_USERNAME}1` : DEMO_USERNAME,
     phone: msisdn,
-    password: "",
+    password: DEMO_PHONE_PASSWORD,
     role: "user",
     totalSelfies: 0,
     totalVideos: 0,
     totalScore: 0,
     challengeWins: 0,
-    challengesCreated: 0,
-    friends: [],
     badges: [],
     isBlocked: false,
     isVerified: true,
-    failedLoginAttempts: 0,
-    createdAt: now,
-    updatedAt: now,
-    averageScore: 0,
-    isLocked: false,
-    comparePassword: async () => false,
-    incrementLoginAttempts: async () => {},
-    resetLoginAttempts: async () => {},
-  } as unknown as IUser;
+  });
+  await user.save();
+  return user;
 }
 
 /**
  * Register a new user
- * - Validates email uniqueness
- * - Hashes password with bcrypt (10 rounds - good balance of security/performance)
- * - Creates user in MongoDB
- * - Returns JWT token and sanitized user data
  */
 export async function registerUser(input: {
   email?: string;
@@ -99,7 +69,7 @@ export async function registerUser(input: {
   name?: string;
 }) {
   const email = input.email?.toLowerCase().trim();
-  const phone = input.phone ? toMsisdn(input.phone.trim()) : undefined;
+  const phone = input.phone ? normalizePhone(input.phone.trim()) : undefined;
   const username = input.username.toLowerCase().trim();
   const name = input.name?.trim() || username;
 
@@ -131,7 +101,6 @@ export async function registerUser(input: {
   try {
     await user.save();
   } catch (error: any) {
-    // Handle potential race-condition duplicate key errors gracefully
     if (error?.code === 11000) {
       if (error.keyPattern?.email) {
         throw new HttpError(409, "Email already registered");
@@ -143,31 +112,47 @@ export async function registerUser(input: {
     throw error;
   }
 
-  // Issue JWT token
   return issueAuthToken(user);
 }
 
-/** Iraq portal login: mselfistar API only — no MongoDB user record */
 export async function loginUser(input: { email?: string; phone?: string; password?: string }) {
   if (input.phone) {
-    const phoneMsisdn = toMsisdn(input.phone.trim());
-    if (!phoneMsisdn) {
+    const phone = normalizePhone(input.phone.trim());
+    if (!phone) {
       throw new HttpError(400, "Invalid mobile number");
     }
 
-    const result = await checkSubscriptionStatus(phoneMsisdn);
-    if (!result.subscribed) {
-      throw new HttpError(403, "Subscription required to access the portal", {
-        status: 0,
-        redirectUrl: "redirectUrl" in result ? result.redirectUrl : undefined,
-      });
+    let user = await User.findOne({
+      phone: { $in: [phone, `+${phone}`] },
+    }).select("+password");
+
+    if (!user) {
+      const demoUser = await ensureDemoPhoneUser(phone);
+      if (!demoUser) {
+        throw new HttpError(401, "No account found with this phone number.");
+      }
+      if (demoUser.isBlocked) {
+        throw new HttpError(403, "Account is not active. Please contact support.");
+      }
+      return issueAuthToken(demoUser);
     }
 
-    return issuePortalToken(phoneMsisdn);
+    if (user.isBlocked) {
+      throw new HttpError(403, "Account is not active. Please contact support.");
+    }
+
+    if (input.password && input.password.trim()) {
+      const passwordMatch = await bcrypt.compare(input.password.trim(), user.password);
+      if (!passwordMatch) {
+        throw new HttpError(401, "Invalid credentials");
+      }
+    }
+
+    return issueAuthToken(user);
   }
 
   const identifier = input.email?.toLowerCase().trim();
-  const user = await User.findOne({ email: identifier }).select("+password").lean();
+  const user = await User.findOne({ email: identifier }).select("+password");
 
   if (!user) {
     throw new HttpError(401, "No account found with this email.");
@@ -177,7 +162,6 @@ export async function loginUser(input: { email?: string; phone?: string; passwor
     throw new HttpError(403, "Account is not active. Please contact support.");
   }
 
-  // If password provided, verify it; if phone-only login skip password check
   if (input.password && input.password.trim()) {
     const passwordMatch = await bcrypt.compare(input.password.trim(), user.password);
     if (!passwordMatch) {
@@ -185,33 +169,48 @@ export async function loginUser(input: { email?: string; phone?: string; passwor
     }
   }
 
-  // Convert lean document to IUser for token generation
-  const userDoc = await User.findById(user._id);
-  if (!userDoc) {
-    throw new HttpError(401, "User not found");
-  }
-
-  // Issue token with role (role is included in JWT payload)
-  return issueAuthToken(userDoc);
+  return issueAuthToken(user);
 }
 
-/**
- * Generate JWT token for authenticated user
- * - Token expires in 7 days (configurable)
- * - Includes user ID, role, and email in payload
- * - Signed with JWT_SECRET from environment
- */
+/** One-click demo login — creates demo user if missing */
+export async function demoLogin() {
+  let user = await User.findOne({ email: DEMO_EMAIL });
+
+  if (!user) {
+    const existingUsername = await User.findOne({ username: DEMO_USERNAME }).select("_id").lean();
+    user = new User({
+      name: "Demo User",
+      email: DEMO_EMAIL,
+      username: existingUsername ? `${DEMO_USERNAME}1` : DEMO_USERNAME,
+      password: DEMO_PASSWORD,
+      role: "user",
+      totalSelfies: 0,
+      totalVideos: 0,
+      totalScore: 0,
+      challengeWins: 0,
+      badges: [],
+      isBlocked: false,
+      isVerified: true,
+    });
+    await user.save();
+  }
+
+  if (user.isBlocked) {
+    throw new HttpError(403, "Demo account is not available");
+  }
+
+  return issueAuthToken(user);
+}
+
 function issueAuthToken(user: IUser) {
-  const phone = user.phone ? toMsisdn(user.phone) : undefined;
+  const phone = user.phone ? normalizePhone(user.phone) : undefined;
   const payload: AuthTokenPayload = {
     sub: user._id.toString(),
     role: user.role,
     email: user.email || "",
-    ...(phone ? { phone, portal: false } : {}),
+    ...(phone ? { phone } : {}),
   };
 
-  // Token expires in 7 days (good balance for user experience and security)
-  // For production, consider shorter expiration (1-3 days) with refresh tokens
   const token = jwt.sign(payload, env.jwtSecret, { expiresIn: "7d" });
 
   return {
@@ -220,13 +219,6 @@ function issueAuthToken(user: IUser) {
   };
 }
 
-/**
- * Verify JWT token and return user
- * - Validates token signature
- * - Checks token expiration
- * - Verifies user still exists and is not blocked
- * - Returns user data for middleware
- */
 export async function verifyToken(token: string): Promise<IUser> {
   let decoded: AuthTokenPayload;
 
@@ -242,11 +234,6 @@ export async function verifyToken(token: string): Promise<IUser> {
     throw new HttpError(401, "Token verification failed");
   }
 
-  if (decoded.portal && decoded.phone) {
-    return buildPortalAuthUser(decoded.phone);
-  }
-
-  // Find user by ID (optimized query with index)
   const user = await User.findById(decoded.sub);
   if (!user) {
     throw new HttpError(401, "User not found");
@@ -259,22 +246,16 @@ export async function verifyToken(token: string): Promise<IUser> {
   return user;
 }
 
-/**
- * Sanitize user data for API responses
- * - Removes sensitive fields (password)
- * - Returns only safe user information
- */
-export function sanitizeUser(user: IUser | { _id: any; username?: string; name: string; email: string; role: string; createdAt: Date; isBlocked: boolean; phone?: string; portal?: boolean; totalSelfies?: number; totalVideos?: number; totalScore?: number; challengeWins?: number; badges?: string[]; profileImage?: string; isVerified?: boolean; lastLogin?: Date }) {
+export function sanitizeUser(user: IUser | { _id: any; username?: string; name: string; email: string; role: string; createdAt: Date; isBlocked: boolean; phone?: string; totalSelfies?: number; totalVideos?: number; totalScore?: number; challengeWins?: number; badges?: string[]; profileImage?: string; isVerified?: boolean; lastLogin?: Date }) {
   const totalMedia = ("totalSelfies" in user ? user.totalSelfies || 0 : 0) + ("totalVideos" in user ? user.totalVideos || 0 : 0);
   const totalScore = "totalScore" in user ? user.totalScore || 0 : 0;
-  
+
   return {
     id: user._id.toString(),
-    username: "username" in user && user.username ? user.username : user.name, // Use username if available, fallback to name
+    username: "username" in user && user.username ? user.username : user.name,
     name: user.name,
     email: user.email,
-    phone: "phone" in user && user.phone ? toMsisdn(String(user.phone)) || user.phone : undefined,
-    portal: Boolean(user.phone && !user.email),
+    phone: "phone" in user && user.phone ? normalizePhone(String(user.phone)) || user.phone : undefined,
     role: user.role,
     profileImage: "profileImage" in user ? user.profileImage : undefined,
     totalSelfies: "totalSelfies" in user ? user.totalSelfies || 0 : 0,

@@ -1,69 +1,35 @@
-import { Link, useSearchParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Star, Camera, Zap, Users, Loader } from "lucide-react";
+import { Star, Camera, Zap, Users } from "lucide-react";
 import VideoBackground from "@/components/VideoBackground";
 import LanguageDropdown from "@/components/LanguageDropdown";
 import Footer from "@/components/Footer";
+import MsisdnLoginPopup from "@/components/MsisdnLoginPopup";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useEffect, useState } from "react";
-import { apiClient } from "@/lib/axios";
-import { SubscriptionStatusResponse } from "@shared/api";
+import { useAuth } from "@/contexts/AuthContext";
+import { useState } from "react";
 
 export default function Index() {
   const { t } = useLanguage();
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [checkingStatus, setCheckingStatus] = useState(false);
+  const { login } = useAuth();
+  const [showPopup, setShowPopup] = useState(false);
 
-  useEffect(() => {
-    const msisdn = (searchParams.get("msisdn") || searchParams.get("phone") || "").trim();
-    if (!msisdn) return;
-
-    let cancelled = false;
-    setCheckingStatus(true);
-
-    apiClient
-      .get<SubscriptionStatusResponse>("/subscription/check-status", { params: { msisdn } })
-      .then((response) => {
-        if (cancelled) return;
-
-        if (response.data.status === 0 && response.data.redirectUrl) {
-          window.location.href = response.data.redirectUrl;
-          return;
-        }
-
-        if (response.data.status === 0) {
-          setCheckingStatus(false);
-          return;
-        }
-
-        if (response.data.status === 1) {
-          navigate(`/login?msisdn=${encodeURIComponent(msisdn)}`, { replace: true });
-        }
-      })
-      .catch(() => {
-        if (!cancelled) setCheckingStatus(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [searchParams, navigate]);
-
-  if (checkingStatus) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center text-white relative">
-        <VideoBackground />
-        <Loader className="h-10 w-10 animate-spin mb-4" />
-        <p className="text-muted-foreground">Checking subscription status...</p>
-      </div>
-    );
-  }
+  const handleMsisdnLogin = async (msisdn: string) => {
+    await login(msisdn, "", true);
+    navigate("/dashboard");
+  };
 
   return (
     <div className="min-h-screen text-foreground relative">
       <VideoBackground />
-      {/* Navigation */}
+
+      <MsisdnLoginPopup
+        open={showPopup}
+        onClose={() => setShowPopup(false)}
+        onLogin={handleMsisdnLogin}
+      />
+
       <nav className="fixed top-0 z-50 w-full border-b border-border/40 bg-transparent backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2">
@@ -71,28 +37,29 @@ export default function Index() {
           </div>
           <div className="flex items-center gap-2">
             <LanguageDropdown />
-            <Link to="/login">
-              <Button className="bg-white text-black hover:bg-white/90 border border-white/30 text-sm px-5">
-                Login
-              </Button>
-            </Link>
+            <Button
+              onClick={() => setShowPopup(true)}
+              className="bg-white text-black hover:bg-white/90 border border-white/30 text-sm px-5"
+            >
+              {t.index.demoBtn}
+            </Button>
           </div>
         </div>
       </nav>
 
-      {/* Hero Section */}
       <section className="relative overflow-hidden pt-32 pb-20 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-4xl text-center">
           <h1 className="text-5xl sm:text-7xl font-bold mb-6 text-white py-32">
             {t.index.hero}
           </h1>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-            <Link to="/login">
-              <Button className="bg-white text-black hover:bg-white/90 border border-white/30 px-8 py-6 text-lg">
-                <Camera className="mr-2 h-5 w-5" />
-                {t.index.getStarted}
-              </Button>
-            </Link>
+            <Button
+              onClick={() => setShowPopup(true)}
+              className="bg-white text-black hover:bg-white/90 border border-white/30 px-8 py-6 text-lg"
+            >
+              <Camera className="mr-2 h-5 w-5" />
+              {t.index.demoBtn}
+            </Button>
           </div>
           <div className="relative h-96 sm:h-[500px] rounded-2xl border border-white/20 bg-transparent backdrop-blur-sm overflow-hidden group">
             <div className="absolute inset-0 flex items-center justify-center">
@@ -105,7 +72,6 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Features Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 border-t border-border/40">
         <div className="mx-auto max-w-6xl">
           <h2 className="text-4xl font-bold text-center mb-16">{t.index.whyTitle}</h2>
@@ -135,7 +101,6 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Stats Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
@@ -159,17 +124,17 @@ export default function Index() {
         </div>
       </section>
 
-      {/* CTA Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 border-t border-border/40">
         <div className="mx-auto max-w-4xl text-center p-12 rounded-2xl border border-white/20 bg-transparent backdrop-blur-sm">
           <h2 className="text-4xl font-bold mb-4">{t.index.ctaTitle}</h2>
           <p className="text-xl text-muted-foreground mb-8">{t.index.ctaDesc}</p>
-          <Link to="/login">
-            <Button className="bg-white text-black hover:bg-white/90 border border-white/30 px-8 py-6 text-lg">
-              <Star className="mr-2 h-5 w-5" />
-              {t.index.ctaBtn}
-            </Button>
-          </Link>
+          <Button
+            onClick={() => setShowPopup(true)}
+            className="bg-white text-black hover:bg-white/90 border border-white/30 px-8 py-6 text-lg"
+          >
+            <Star className="mr-2 h-5 w-5" />
+            {t.index.demoBtn}
+          </Button>
         </div>
       </section>
 

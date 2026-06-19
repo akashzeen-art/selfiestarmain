@@ -11,6 +11,7 @@ const es = {
   index: {
     hero: "¡SONRÍE, TÓMATE UN SELFIE!",
     getStarted: "Comenzar",
+    demoBtn: "Probar demo",
     alreadyStar: "¿Ya eres una Estrella?",
     whyTitle: "¿Por qué SelfiStar?",
     feature1Title: "Puntuación con IA",
@@ -42,6 +43,14 @@ const es = {
     backHome: "← Volver al inicio",
     fillFields: "Por favor completa todos los campos",
     loginFailed: "Error al iniciar sesión. Inténtalo de nuevo.",
+    demoBtn: "Entrar al demo",
+    demoNote: "Toca abajo para explorar SelfiStar al instante — sin registro.",
+    enteringDemo: "Iniciando demo...",
+    msisdnTitle: "Ingresa tu número móvil",
+    msisdnDesc: "El número demo ya está cargado. Toca Iniciar sesión para continuar.",
+    msisdnLabel: "Número móvil (MSISDN)",
+    msisdnRequired: "Por favor ingresa tu número móvil",
+    cancel: "Cancelar",
   },
   register: {
     joinStars: "Únete a millones de Estrellas",

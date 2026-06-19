@@ -27,7 +27,7 @@ export function applySecurityMiddleware(app: Express) {
               "https://*.cloudinary.com",
             ],
             scriptSrc: ["'self'"],
-            connectSrc: ["'self'", "https://*.cloudinary.com", "https://mselfistar.com"],
+            connectSrc: ["'self'", "https://*.cloudinary.com"],
             mediaSrc: [
               "'self'",
               "blob:",

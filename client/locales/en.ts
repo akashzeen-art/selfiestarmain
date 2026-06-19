@@ -11,6 +11,7 @@ const en = {
   index: {
     hero: "SMILE, TAKE A SELFIE !",
     getStarted: "Get Started",
+    demoBtn: "Try Demo",
     alreadyStar: "Already a Star?",
     whyTitle: "Why SelfiStar?",
     feature1Title: "AI-Powered Scoring",
@@ -42,6 +43,14 @@ const en = {
     backHome: "← Back to home",
     fillFields: "Please fill in all fields",
     loginFailed: "Login failed. Please try again.",
+    demoBtn: "Enter Demo",
+    demoNote: "Tap below to explore SelfiStar instantly — no signup required.",
+    enteringDemo: "Starting demo...",
+    msisdnTitle: "Enter Mobile Number",
+    msisdnDesc: "Demo number is pre-filled. Tap Sign In to continue.",
+    msisdnLabel: "Mobile Number (MSISDN)",
+    msisdnRequired: "Please enter your mobile number",
+    cancel: "Cancel",
   },
   register: {
     joinStars: "Join millions of Stars",

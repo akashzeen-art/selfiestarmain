@@ -9,7 +9,6 @@ import videoRoutes from "./routes/video";
 import userRoutes from "./routes/user";
 import friendRoutes from "./routes/friends";
 import filterRoutes from "./routes/filters";
-import subscriptionRoutes from "./routes/subscription";
 import { applySecurityMiddleware } from "./middleware/security";
 import { sanitizeInput } from "./middleware/xss";
 import { errorHandler, notFoundHandler } from "./middleware/error-handler";
@@ -60,8 +59,6 @@ export function createServer() {
   app.use("/api/selfies", selfieRoutes);
   app.use("/api/video", videoRoutes);
   app.use("/api/filters", filterRoutes);
-  app.use("/api/subscription", subscriptionRoutes);
-
   app.use(notFoundHandler);
   app.use(errorHandler);
 
